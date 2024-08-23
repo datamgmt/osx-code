@@ -1,0 +1,4 @@
+Welcome to MQTTBuzz version 0.1
+by David M. Walker
+
+This utility reads messages from an MQTT Feed and displays them

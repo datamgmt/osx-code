@@ -1,0 +1,20 @@
+{
+    "mqtt_servers": [
+        {
+            "mqtt_broker": "broker1_address",
+            "mqtt_port": 1883,
+            "mqtt_topic": "topic1",
+            "username": "your_username",
+            "password": "your_password",
+            "sound_name": "Submarine",
+            "header": None,  # Default to broker name if not specified
+            "subheader": None,  # Default to topic if not specified
+            "enabled": True  # Default broker to enabled
+        }
+    ],
+    "notification_sounds": {
+        "settings_saved": "Glass",
+        "invalid_config": "Basso",
+        "error": "Funk"
+    }
+}
