@@ -1,0 +1,58 @@
+#!/bin/bash
+
+usage() {
+   echo ""
+   echo "usage: ${PROGNAME} -f filename" 
+   echo "       ${PROGNAME} -h (this message)" 
+   echo ""
+   echo "Convert a png file into an Apple format .icns file"
+   echo "The input MUST be a 1024x1024 pixel png file"
+   echo ""
+   exit 1
+}
+
+PROGNAME=`basename $0`
+
+while getopts "hf:" ARG; do
+  case ${ARG} in
+    h)
+      usage;;
+    f)
+      FILE=${OPTARG}
+      ;;
+  esac
+done
+
+if [ -z "${FILE}" ] || [ ! -r "${FILE}" ]
+then
+   usage
+fi
+
+IMAGEX=`sips -g pixelWidth  ${FILE} | grep ':' | cut -d: -f2 | tr -d " "`
+IMAGEY=`sips -g pixelHeight ${FILE} | grep ':' | cut -d: -f2 | tr -d " "`
+IMAGEFMT=`sips -g format    ${FILE} | grep ':' | cut -d: -f2 | tr -d " "`
+
+if [ "${IMAGEX}" != "1024" ] || [ "${IMAGEY}" != "1024" ] || [ "${IMAGEFMT}" != "png" ]
+then
+   usage
+fi
+
+OUTPUT_DIR=`dirname ${FILE}`
+OUTPUT_FILE=`basename ${FILE} | sed 's!.png$!.icns!g'`
+
+mkdir MyIcon.iconset
+sips -z 16 16   ${FILE} --out MyIcon.iconset/icon_16x16.png
+sips -z 32 32   ${FILE} --out MyIcon.iconset/icon_16x16@2x.png
+sips -z 32 32   ${FILE} --out MyIcon.iconset/icon_32x32.png
+sips -z 64 64   ${FILE} --out MyIcon.iconset/icon_32x32@2x.png
+sips -z 128 128 ${FILE} --out MyIcon.iconset/icon_128x128.png
+sips -z 256 256 ${FILE} --out MyIcon.iconset/icon_128x128@2x.png
+sips -z 256 256 ${FILE} --out MyIcon.iconset/icon_256x256.png
+sips -z 512 512 ${FILE} --out MyIcon.iconset/icon_256x256@2x.png
+sips -z 512 512 ${FILE} --out MyIcon.iconset/icon_512x512.png
+cp ${FILE} MyIcon.iconset/icon_512x512@2x.png
+iconutil -c icns MyIcon.iconset
+rm -R MyIcon.iconset
+mv MyIcon.icns ${OUTPUT_DIR}/${OUTPUT_FILE}
+
+exit 0
