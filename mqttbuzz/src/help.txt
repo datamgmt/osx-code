@@ -1,10 +1,10 @@
 Welcome to MQTTBuzz version 0.1
 by David M. Walker
 
-MQTT Buzz Help Guide
+MQTTBuzz Help Guide
 
-Welcome to MQTT Buzz!
-MQTT Buzz is a user-friendly application that allows you to connect to multiple MQTT brokers and receive notifications based on the messages published to specific topics. This guide will walk you through how to configure, run, and use the MQTT Buzz application.
+Welcome to MQTTBuzz!
+MQTTBuzz is a user-friendly application that allows you to connect to multiple MQTT brokers and receive notifications based on the messages published to specific topics. This guide will walk you through how to configure, run, and use the MQTTBuzz application.
 
 Table of Contents
 
@@ -14,8 +14,8 @@ Table of Contents
 	•	Configuring MQTT Brokers
 	•	Notification Sounds
 	•	Enabling/Disabling Brokers
-	4.	Running MQTT Buzz
-	5.	Using MQTT Buzz
+	4.	Running MQTTBuzz
+	5.	Using MQTTBuzz
 	•	Connect/Disconnect
 	•	Settings
 	•	Help
@@ -24,7 +24,7 @@ Table of Contents
 
 1. Getting Started
 
-To use MQTT Buzz, you need to have Python installed on your system along with the necessary libraries (rumps and paho-mqtt).
+To use MQTTBuzz, you need to have Python installed on your system along with the necessary libraries (rumps and paho-mqtt).
 
 2. Installation
 
@@ -93,18 +93,18 @@ Enabling/Disabling Brokers
 
 	•	To enable or disable a broker, set the enabled flag in the mqtt_servers configuration. true means the broker is enabled, and false means it is disabled.
 
-4. Running MQTT Buzz
+4. Running MQTTBuzz
 
 	1.	Run the Application:
 	•	Open your terminal or command prompt.
-	•	Navigate to the directory where the MQTT Buzz script is located.
+	•	Navigate to the directory where the MQTTBuzz script is located.
 	•	Run the script using Python:
     
 python mqttbuzz.py
 
 •	The application will start and appear in your system’s menu bar or system tray.
 
-5. Using MQTT Buzz
+5. Using MQTTBuzz
 
 Connect/Disconnect
 
@@ -132,5 +132,5 @@ Sound On/Off
 	•	MQTT Connection Issues: Verify that your broker addresses, ports, and authentication credentials are correct. Check your internet connection and broker availability.
 	•	No Notifications: Ensure that the topics you subscribed to are publishing messages. Also, ensure that notifications are not disabled by your operating system.
 
-Thank you for using MQTT Buzz! We hope this application enhances your MQTT experience. For further assistance, feel free to consult the community or refer to the official MQTT documentation.
+Thank you for using MQTTBuzz! We hope this application enhances your MQTT experience. For further assistance, feel free to consult the community or refer to the official MQTT documentation.
 

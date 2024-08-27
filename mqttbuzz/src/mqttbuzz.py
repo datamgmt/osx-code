@@ -1,21 +1,41 @@
-import rumps
-import paho.mqtt.client as mqtt
-import threading
+""" 
+MQTTBuzz is a user-friendly application that allows you to connect to multiple MQTT brokers 
+and receive notifications based on the messages published to specific topics. 
+"""
+
+# pylint: disable=import-error, too-many-instance-attributes, invalid-sequence-index, broad-exception-caught, unused-argument, unused-variable, too-many-arguments
+
+# System Libraries
 import json
 import os
+import threading
 import time
+
+# Third Party Libraries
+import paho.mqtt.client as mqtt
+import rumps
 
 # Path to the configuration and help files
 CONFIG_FILE = "config.json"
 HELP_FILE = "help.txt"
 
 class MQTTBuzzApp(rumps.App):
-    def __init__(self):
-        # Define the application name
-        self.app_name = "MQTTBuzz"  
-        super(MQTTBuzzApp, self).__init__(self.app_name)
+    """ 
+    The main Ridiculously Uncomplicated macOS Python Statusbar apps (rumps) class
+    This allows a Python script to present as a simple dropdown menu in the OSX toolbar
+    For further details see: https://github.com/jaredks/rumps
+    """
 
-        # Load configuration
+    def __init__(self):
+        """
+        Initialize variables and configuration options then connect
+        """
+
+        # Define the application name
+        self.app_name = "MQTTBuzz"
+        super().__init__(self.app_name)
+
+        # Load the configuration
         self.config = self.load_config()
 
         # Store MQTT clients for potential disconnect
@@ -23,12 +43,12 @@ class MQTTBuzzApp(rumps.App):
 
         # Store connection state
         self.connected = False
-        
-        # Store last messages and timestamps for filtering
-        self.last_messages = {}  # To store last message per broker
+
+        # Store the last messages and timestamps for filtering
+        self.last_messages = {}       # To store last message per broker
         self.last_message_times = {}  # To store last message time per broker
 
-        # Create the menu
+        # Create the toolbar menu
         self.menu = ["Connect to MQTT", "Help", "Settings",  "Sound On/Off"]
 
         # Set initial state for sound
@@ -48,8 +68,13 @@ class MQTTBuzzApp(rumps.App):
         self.menu["Connect to MQTT"].title = "Disconnect from MQTT"
 
     def load_config(self):
+        """ 
+        Read the configuration file if it exists
+        If it doesn't then create a default file and use that instead
+        """
+
         if os.path.exists(CONFIG_FILE):
-            with open(CONFIG_FILE, 'r') as file:
+            with open(CONFIG_FILE, 'r', encoding="utf-8") as file:
                 return json.load(file)
         else:
             default_config = {
@@ -60,42 +85,46 @@ class MQTTBuzzApp(rumps.App):
                         "mqtt_topic": "topic1",
                         "username": "your_username",
                         "password": "your_password",
-                        "sound_name": "Submarine",
                         "header": None,  # Default to broker name if not specified
                         "subheader": None,  # Default to topic if not specified
-                        "enabled": True,  # Default broker to enabled
+                        "broker_enabled": True,  # Default broker to enabled
+                        "sounds_enabled": True,  # Default broker to enabled
                         "filter": "none",  # No filtering by default
                         "filter_time": 0  # No filter time by default
                     }
                 ],
-                "notification_sounds": {
-                    "settings_saved": "Glass",
-                    "invalid_config": "Basso",
-                    "error": "Funk"
-                },
                 "sounds_enabled": True  # Default sound setting to enabled
             }
-            with open(CONFIG_FILE, 'w') as file:
-                json.dump(default_config, file, indent=4)
+            self.save_config(default_config)
             return default_config
 
-    def save_config(self):
-        with open(CONFIG_FILE, 'w') as file:
+    def save_config(self, config_data):
+        """
+        Write out an updated version of the config file
+        """
+
+        with open(CONFIG_FILE, 'w', encoding="utf-8") as file:
             json.dump(self.config, file, indent=4)
 
     def load_help_text(self):
-        """Load the help text from the help.txt file."""
+        """
+        Load the help text from the help.txt file.
+        """
+
         if os.path.exists(HELP_FILE):
-            with open(HELP_FILE, 'r') as file:
+            with open(HELP_FILE, 'r', encoding="utf-8") as file:
                 return file.read()
         else:
-            default_help_text = "This is the MQTT Buzz app. Configure your MQTT settings to connect to different brokers."
-            with open(HELP_FILE, 'w') as file:
+            default_help_text = "This is the MQTTBuzz app. Configure your MQTT settings."
+            with open(HELP_FILE, 'w', encoding="utf-8") as file:
                 file.write(default_help_text)
             return default_help_text
 
     def toggle_connect(self, sender):
-        """Toggle the connection state between connect and disconnect."""
+        """
+        Toggle the connection state between connect and disconnect.
+        """
+
         if self.connected:
             self.disconnect_mqtt_clients()
             sender.title = "Connect to MQTT"
@@ -106,36 +135,50 @@ class MQTTBuzzApp(rumps.App):
             self.connected = True
 
     def toggle_sound(self, sender):
-        """Toggle the sound setting on or off."""
+        """
+        Toggle the sound setting on or off.
+        """
+
         self.sounds_enabled = not self.sounds_enabled
         self.config["sounds_enabled"] = self.sounds_enabled
         sender.state = self.sounds_enabled
-        self.save_config()
-        self.notify_with_sound(self.app_name, f"Sounds {'enabled' if self.sounds_enabled else 'disabled'}.")
+        self.save_config(self.config)
+        self.notify_with_sound(self.app_name,
+            f"Sounds {'enabled' if self.sounds_enabled else 'disabled'}.")
 
     def connect_to_mqtt(self):
-        """Connect to all enabled MQTT brokers."""
+        """
+        Connect to all enabled MQTT brokers.
+        """
+
         # Disconnect any existing MQTT clients
         self.disconnect_mqtt_clients()
 
         # Start new MQTT clients based on the current configuration
         for server in self.config["mqtt_servers"]:
             # Check if the server is enabled
-            if server.get("enabled", False):
+            if server.get("broker_enabled", False):
                 mqtt_thread = threading.Thread(target=self.start_mqtt_client, args=(server,))
                 mqtt_thread.daemon = True
                 mqtt_thread.start()
 
-        self.notify_with_sound(self.app_name, "Attempting to connect to MQTT brokers", sound_name="Submarine")
+        self.notify_with_sound(self.app_name, "Attempting to connect to MQTT brokers")
 
     def disconnect_mqtt_clients(self):
-        """Disconnect from all MQTT brokers."""
+        """
+        Disconnect from all MQTT brokers.
+        """
+
         for client in self.mqtt_clients:
             client.disconnect()
         self.mqtt_clients = []
 
     def start_mqtt_client(self, server):
-        client = mqtt.Client()
+        """ 
+        Start a new client for each broker
+        """
+
+        client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
 
         # Set username and password if provided
         if "username" in server and "password" in server:
@@ -154,26 +197,35 @@ class MQTTBuzzApp(rumps.App):
             client.loop_start()  # Use loop_start instead of loop_forever to allow disconnects
             self.mqtt_clients.append(client)
         except Exception as e:
-            self.notify_with_sound(f"MQTT Connection Failed ({server['mqtt_broker']})", str(e), sound_name=server.get("sound_name"))
+            self.notify_with_sound(f"MQTT Connection Failed ({server['mqtt_broker']})", str(e))
 
-    def on_connect(self, client, userdata, flags, rc):
-        # Extract header and subheader
+    def on_connect(self, client, userdata, flags, rc, properties=None):
+        """ 
+        Connect to a broker and topic 
+        """
+
         header = userdata.get("header", userdata["mqtt_broker"])
         subheader = userdata.get("subheader", userdata["mqtt_topic"])
 
         if rc == 0:
-            self.notify_with_sound(header, f"Successfully connected to {header}", subheader=subheader, sound_name=userdata.get("sound_name"))
+            self.notify_with_sound(self.app_name,
+                f"Successfully connected to {header}:{subheader}")
             client.subscribe(userdata["mqtt_topic"])
         else:
-            self.notify_with_sound(header, f"Failed to connect with result code {rc}", subheader=subheader, sound_name=userdata.get("sound_name"))
+            self.notify_with_sound(self.app_name,
+                f"Failed to connect to {header}:{subheader} with result code {rc}")
 
     def on_message(self, client, userdata, msg):
+        """
+        When a message is received send to notifications
+        """
+
         broker = userdata["mqtt_broker"]
         topic = userdata["mqtt_topic"]
         message = msg.payload.decode()
         filter_type = userdata.get("filter", "none")
         filter_time = userdata.get("filter_time", 0)
-        
+
         current_time = time.time()
 
         # Handle filtering logic
@@ -196,56 +248,71 @@ class MQTTBuzzApp(rumps.App):
                 self.last_message_times[broker] = current_time
 
     def send_notification(self, userdata, message):
-        # Extract header and subheader
+        """
+        Format payload message
+        """
+
         header = userdata.get("header", userdata["mqtt_broker"])
         subheader = userdata.get("subheader", userdata["mqtt_topic"])
-        sound_name = userdata.get("sound_name")
-        message = msg.payload.decode()
-        self.notify_with_sound(header, message, subheader=subheader, sound_name=userdata.get("sound_name"))
+        self.notify_with_sound(header, message, subheader=subheader,
+            sounds=userdata.get("sounds_enabled", True))
 
-    def on_disconnect(self, client, userdata, rc):
-        # Extract header and subheader
+    def on_disconnect(self, client, userdata, flags, rc, properties=None):
+        """ 
+        Handle disconnection from brokers and topics
+        """
+
         header = userdata.get("header", userdata["mqtt_broker"])
         subheader = userdata.get("subheader", userdata["mqtt_topic"])
-        self.notify_with_sound(header, "Disconnected from MQTT broker", subheader=subheader, sound_name=userdata.get("sound_name"))
 
-    def notify_with_sound(self, header, message, subheader=None, sound_name=None):
+        self.notify_with_sound(self.app_name, f"Disconnected from {header}:{subheader}")
+
+    def notify_with_sound(self, header, message, subheader=None, sounds=True):
+        """
+        Call the Apple Notification sub-ssutem
+        """
+
         # Send notification with an optional sound and subheader
         subtitle = subheader if subheader else ""
-        if sound_name is None or not self.sounds_enabled:
-            rumps.notification(title=header, subtitle=subtitle, message=message)
-        else:
-            rumps.notification(title=header, subtitle=subtitle, message=message, sound=sound_name)
+        sounds = sounds and self.sounds_enabled
+        rumps.notification(title=header, subtitle=subtitle, message=message, sound=sounds)
 
     @rumps.clicked("Settings")
     def settings(self, _):
+        """
+        Handle user defined settings
+        """
+
         response = rumps.Window(
             message="Edit MQTT Settings",
             title="Settings",
             default_text=json.dumps(self.config, indent=4),
-            dimensions=(480, 400)  # Updated dimensions to 480x400
+            dimensions=(480, 400)
         ).run()
 
         if response.clicked:
             try:
                 new_config = json.loads(response.text)
                 self.config = new_config
-                self.save_config()
-                self.notify_with_sound(self.app_name, "The configuration has been updated.", sound_name=self.config["notification_sounds"].get("settings_saved"))
+                self.save_config(self.config)
+                self.notify_with_sound(self.app_name, "The configuration has been updated.")
                 # Reconnect with the new configuration
                 self.connect_to_mqtt()
             except json.JSONDecodeError:
-                self.notify_with_sound(self.app_name, "The settings you entered are not valid JSON.", sound_name=self.config["notification_sounds"].get("invalid_config"))
+                self.notify_with_sound(self.app_name,
+                    "The settings you entered are not valid JSON.")
             except Exception as e:
-                self.notify_with_sound(self.app_name, str(e), sound_name=self.config["notification_sounds"].get("error"))
+                self.notify_with_sound(self.app_name, str(e))
 
     @rumps.clicked("Help")
     def help(self, _):
-        # Show a help dialog with text from the help.txt file
+        """
+        Show a help dialog with text from the help.txt file
+        """
+
         rumps.Window(
             title="Help",
-            message=self.help_text,
-            dimensions=(480, 400)  # Updated help text box dimensions to 480x400
+            message=self.help_text
         ).run()
 
 if __name__ == "__main__":
