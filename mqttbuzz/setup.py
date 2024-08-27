@@ -11,7 +11,7 @@ APP = ['src/mqttbuzz.py']
 DATA_FILES = ['src/config.json','src/help.txt']
 OPTIONS = {
     'iconfile': 'src/MQTTBuzz.icns',
-    'includes': ['rumps', 'paho.mqtt.client']
+    'includes': ['rumps', 'paho.mqtt.client', 'threading', 'json', 'os']
 }
 
 setup(
@@ -20,4 +20,3 @@ setup(
     options={'py2app': OPTIONS},
     setup_requires=['py2app'],
 )
-

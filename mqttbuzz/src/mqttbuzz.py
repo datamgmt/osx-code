@@ -23,7 +23,13 @@ class MQTTBuzzApp(rumps.App):
         self.connected = False
 
         # Create the menu
-        self.menu = ["Connect to MQTT", "Settings", "Help"]  # Added "Help" to the menu
+        self.menu = ["Connect to MQTT", "Settings", "Help", "Sound On/Off"]  # Added "Sound On/Off" to the menu
+
+        # Set initial state for sound
+        self.sounds_enabled = self.config.get("sounds_enabled", True)
+
+        # Initialize sound toggle menu
+        self.menu["Sound On/Off"].state = self.sounds_enabled
 
         # Read help text from file
         self.help_text = self.load_help_text()
@@ -56,7 +62,8 @@ class MQTTBuzzApp(rumps.App):
                     "settings_saved": "Glass",
                     "invalid_config": "Basso",
                     "error": "Funk"
-                }
+                },
+                "sounds_enabled": True  # Default sound setting to enabled
             }
             with open(CONFIG_FILE, 'w') as file:
                 json.dump(default_config, file, indent=4)
@@ -87,6 +94,14 @@ class MQTTBuzzApp(rumps.App):
             self.connect_to_mqtt()
             sender.title = "Disconnect from MQTT"
             self.connected = True
+
+    def toggle_sound(self, sender):
+        """Toggle the sound setting on or off."""
+        self.sounds_enabled = not self.sounds_enabled
+        self.config["sounds_enabled"] = self.sounds_enabled
+        sender.state = self.sounds_enabled
+        self.save_config()
+        self.notify_with_sound(self.app_name, f"Sounds {'enabled' if self.sounds_enabled else 'disabled'}.")
 
     def connect_to_mqtt(self):
         """Connect to all enabled MQTT brokers."""
@@ -158,7 +173,7 @@ class MQTTBuzzApp(rumps.App):
     def notify_with_sound(self, header, message, subheader=None, sound_name=None):
         # Send notification with an optional sound and subheader
         subtitle = subheader if subheader else ""
-        if sound_name is None:
+        if sound_name is None or not self.sounds_enabled:
             rumps.notification(title=header, subtitle=subtitle, message=message)
         else:
             rumps.notification(title=header, subtitle=subtitle, message=message, sound=sound_name)
@@ -198,4 +213,6 @@ if __name__ == "__main__":
     app = MQTTBuzzApp()
     # Modify the Connect to MQTT menu item to act as a toggle
     app.menu["Connect to MQTT"].set_callback(app.toggle_connect)
+    # Modify the Sound On/Off menu item to act as a toggle
+    app.menu["Sound On/Off"].set_callback(app.toggle_sound)
     app.run()
