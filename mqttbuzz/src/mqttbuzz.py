@@ -3,6 +3,7 @@ import paho.mqtt.client as mqtt
 import threading
 import json
 import os
+import time
 
 # Path to the configuration and help files
 CONFIG_FILE = "config.json"
@@ -10,7 +11,8 @@ HELP_FILE = "help.txt"
 
 class MQTTBuzzApp(rumps.App):
     def __init__(self):
-        self.app_name = "MQTT Buzz"  # Define the application name
+        # Define the application name
+        self.app_name = "MQTTBuzz"  
         super(MQTTBuzzApp, self).__init__(self.app_name)
 
         # Load configuration
@@ -21,9 +23,13 @@ class MQTTBuzzApp(rumps.App):
 
         # Store connection state
         self.connected = False
+        
+        # Store last messages and timestamps for filtering
+        self.last_messages = {}  # To store last message per broker
+        self.last_message_times = {}  # To store last message time per broker
 
         # Create the menu
-        self.menu = ["Connect to MQTT", "Settings", "Help", "Sound On/Off"]  # Added "Sound On/Off" to the menu
+        self.menu = ["Connect to MQTT", "Help", "Settings",  "Sound On/Off"]
 
         # Set initial state for sound
         self.sounds_enabled = self.config.get("sounds_enabled", True)
@@ -35,6 +41,8 @@ class MQTTBuzzApp(rumps.App):
         self.help_text = self.load_help_text()
 
         # Connect to MQTT brokers at startup
+
+        # Start MQTT clients
         self.connect_to_mqtt()
         self.connected = True
         self.menu["Connect to MQTT"].title = "Disconnect from MQTT"
@@ -55,7 +63,9 @@ class MQTTBuzzApp(rumps.App):
                         "sound_name": "Submarine",
                         "header": None,  # Default to broker name if not specified
                         "subheader": None,  # Default to topic if not specified
-                        "enabled": True  # Default broker to enabled
+                        "enabled": True,  # Default broker to enabled
+                        "filter": "none",  # No filtering by default
+                        "filter_time": 0  # No filter time by default
                     }
                 ],
                 "notification_sounds": {
@@ -158,9 +168,38 @@ class MQTTBuzzApp(rumps.App):
             self.notify_with_sound(header, f"Failed to connect with result code {rc}", subheader=subheader, sound_name=userdata.get("sound_name"))
 
     def on_message(self, client, userdata, msg):
+        broker = userdata["mqtt_broker"]
+        topic = userdata["mqtt_topic"]
+        message = msg.payload.decode()
+        filter_type = userdata.get("filter", "none")
+        filter_time = userdata.get("filter_time", 0)
+        
+        current_time = time.time()
+
+        # Handle filtering logic
+        if filter_type == "none":
+            # No filtering, always send notification
+            self.send_notification(userdata, message)
+        elif filter_type == "dedup":
+            # Deduplicate messages
+            last_message = self.last_messages.get(broker)
+            last_time = self.last_message_times.get(broker, 0)
+            if last_message != message or (current_time - last_time) > filter_time:
+                self.send_notification(userdata, message)
+                self.last_messages[broker] = message
+                self.last_message_times[broker] = current_time
+        elif filter_type == "throttle":
+            # Throttle messages
+            last_time = self.last_message_times.get(broker, 0)
+            if (current_time - last_time) > filter_time:
+                self.send_notification(userdata, message)
+                self.last_message_times[broker] = current_time
+
+    def send_notification(self, userdata, message):
         # Extract header and subheader
         header = userdata.get("header", userdata["mqtt_broker"])
         subheader = userdata.get("subheader", userdata["mqtt_topic"])
+        sound_name = userdata.get("sound_name")
         message = msg.payload.decode()
         self.notify_with_sound(header, message, subheader=subheader, sound_name=userdata.get("sound_name"))
 
