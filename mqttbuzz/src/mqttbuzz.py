@@ -312,7 +312,8 @@ class MQTTBuzzApp(rumps.App):
 
         rumps.Window(
             title="Help",
-            message=self.help_text
+            message=self.help_text,
+            dimensions=(0, 0)
         ).run()
 
 if __name__ == "__main__":

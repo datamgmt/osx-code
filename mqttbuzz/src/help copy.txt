@@ -1,0 +1,100 @@
+MQTTBuzz User Help File
+
+Overview
+
+MQTTBuzz is a user-friendly macOS application that allows you to connect to multiple MQTT brokers and receive notifications based on messages published on specific topics. This application is designed to run in the macOS toolbar, providing easy access to settings and information.
+
+Features
+
+	•	Connect to Multiple MQTT Brokers: Easily configure and manage connections to multiple MQTT brokers.
+	•	Customizable Notifications: Receive notifications for messages from specific topics.
+	•	Sound Notifications: Enable or disable sound alerts for new messages.
+	•	Filter Options: Filter messages to avoid duplicates or throttle notifications.
+
+Getting Started
+
+	1.	Install MQTTBuzz: Make sure you have the application installed on your macOS system.
+	2.	Run MQTTBuzz: Launch the application, and it will appear as an icon in the macOS toolbar.
+	3.	Configure MQTT Settings: Before connecting to MQTT brokers, configure your settings to ensure proper operation.
+
+For further details on configuring please see: https://github.com/datamgmt/MQTTBuzz
+    
+Configuring MQTTBuzz
+
+To configure MQTTBuzz, follow these steps:
+
+1. Configure the application
+
+You can configure and update the settings directly from the UI:
+
+	•	Click on the MQTTBuzz icon in the macOS toolbar.
+	•	Select Settings.
+	•	A window will open with the current configuration in JSON format.
+	•	Edit the configuration as needed and click OK to save.
+
+	Note: Make sure the edited JSON is valid. An error will be displayed if the configuration is invalid.
+
+    Configuration Parameters
+
+    	•	mqtt_broker: The address of the MQTT broker.
+    	•	mqtt_port: The port number of the MQTT broker (default is 1883).
+    	•	mqtt_topic: The topic to subscribe to.
+    	•	username: The username for MQTT broker authentication (if required).
+    	•	password: The password for MQTT broker authentication (if required).
+    	•	header: Optional. The title for notifications (defaults to broker name).
+    	•	subheader: Optional. The subtitle for notifications (defaults to topic name).
+    	•	broker_enabled: Boolean. Whether this broker is enabled (default is true).
+    	•	sounds_enabled: Boolean. Whether to enable sound for notifications (default is true).
+    	•	filter: Type of message filtering:
+            •	"none": No filtering, all messages are sent as notifications.
+    	    •	"dedup": Deduplicates messages, only sending notifications for new messages.
+            •	"throttle": Throttles notifications, limiting the frequency based on filter_time.
+    	•	filter_time: Time in seconds for filtering (applicable for dedup and throttle).
+
+
+3. Connect to MQTT Brokers
+
+	•	Click on the MQTTBuzz icon in the macOS toolbar.
+	•	Select Connect to MQTT to initiate connections to the configured MQTT brokers.
+	•	If already connected, selecting Disconnect from MQTT will disconnect all brokers.
+
+4. Enable or Disable Sound Notifications
+
+	•	Click on the MQTTBuzz icon in the macOS toolbar.
+	•	Toggle Sound On/Off to enable or disable sound notifications.
+
+5. View Help
+
+	•	Click on the MQTTBuzz icon in the macOS toolbar.
+	•	Select Help to view this help information.
+
+Advanced Usage
+
+Message Filtering
+
+MQTTBuzz supports different message filtering options to control how notifications are handled:
+
+	•	None: No filtering, all messages are notified.
+	•	Deduplication: Prevents multiple notifications for the same message.
+	•	Throttling: Limits the number of notifications within a certain time frame.
+
+Managing Multiple Brokers
+
+MQTTBuzz allows you to connect to multiple brokers simultaneously. Simply add multiple broker configurations in the config.json file, each with unique settings.
+
+Error Handling
+
+	•	Connection Errors: If MQTTBuzz cannot connect to a broker, an error notification will be displayed with details.
+	•	Invalid Configuration: If the configuration file contains errors, MQTTBuzz will not apply the settings and notify you of the issue.
+
+Troubleshooting
+
+	•	Cannot Connect to MQTT Broker: Check the broker address, port, username, and password. Ensure the broker is running and accessible.
+	•	No Notifications Received: Ensure the topics are correctly configured and the broker is enabled in the settings.
+	•	Sound Notifications Not Working: Verify that the sound option is enabled both globally and per broker in the settings.
+
+Conclusion
+
+MQTTBuzz provides a convenient way to stay updated with messages from MQTT brokers. By following this help guide, you can easily set up, configure, and manage multiple MQTT connections with customized notification settings.
+
+For more detailed support, please refer to the rumps documentation or the MQTT library Paho MQTT documentation.
