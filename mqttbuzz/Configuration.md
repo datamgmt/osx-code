@@ -33,3 +33,51 @@ You can configure and update the settings directly from the UI:
     	•	filter_time: Time in seconds for filtering (applicable for dedup and throttle).
 
 
+```
+{
+    "mqtt_servers": [
+        {
+            "mqtt_broker": "broker1.example.com",
+            "mqtt_port": 1883,
+            "mqtt_topic": "home/livingroom/temperature",
+            "username": "user1",
+            "password": "password1",
+            "header": "Living Room",
+            "subheader": "Temperature",
+            "broker_enabled": false,
+            "sounds_enabled": false,
+            "filter": "none",  # No filtering
+            "filter_time": 0  # Not used when filter is 'none'
+        },
+        {
+            "mqtt_broker": "broker2.example.com",
+            "mqtt_port": 1883,
+            "mqtt_topic": "office/desk/light",
+            "username": "user2",
+            "password": "password2",
+            "sound_name": "Glass",
+            "header": null,  # Will default to the mqtt_broker value
+            "subheader": null,  # Will default to the mqtt_topic value
+            "broker_enabled": true,
+            "sounds_enabled": true,
+            "filter": "dedup",  # Deduplicate messages
+            "filter_time": 10  # 10 seconds deduplication window
+        },
+        {
+            "mqtt_broker": "broker3.example.com",
+            "mqtt_port": 1883,
+            "mqtt_topic": "kitchen/fridge/door",
+            "username": "user3",
+            "password": "password3",
+            "sound_name": "Ping",
+            "header": "Kitchen",
+            "subheader": null,  # Will default to the mqtt_topic value
+            "broker_enabled": true,
+            "sounds_enabled": true,
+            "filter": "throttle",  # Throttle messages
+            "filter_time": 5  # 5 seconds throttle window
+        }
+    ],
+    "sounds_enabled": false
+}
+```
