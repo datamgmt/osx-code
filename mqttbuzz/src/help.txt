@@ -17,5 +17,5 @@ Getting Started
 	2.	Run MQTTBuzz: Launch the application, and it will appear as an icon in the macOS toolbar.
 	3.	Configure MQTT Settings: Before connecting to MQTT brokers, configure your settings to ensure proper operation.
 
-For further details on configuring please see: 
+For further details on configuring please see the configuaration section at: 
 https://github.com/datamgmt/MQTTBuzz

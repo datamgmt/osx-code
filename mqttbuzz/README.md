@@ -25,3 +25,4 @@ For further details see:
 
  *  [Development & Packaging](https://github.com/datamgmt/MQTTBuzz/Development.md)
  *  [Configuration](https://github.com/datamgmt/MQTTBuzz/Configuration.md)
+ *  [Using MQTT](https://github.com/datamgmt/MQTTBuzz/Using.md)
