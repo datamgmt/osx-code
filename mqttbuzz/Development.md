@@ -53,7 +53,7 @@ python3 ./MQTTBuzz.py
 
 You can then make any changes required to python code
 
-## Building the application
+## Build and package the application
 
 Building the application is simple
 First go to the root directory of MQTTBuzz
