@@ -7,7 +7,7 @@ Usage:
 
 from setuptools import setup
 
-APP = ['src/mqttbuzz.py']
+APP = ['src/MQTTBuzz.py']
 DATA_FILES = ['src/config.json','src/help.txt']
 OPTIONS = {
     'iconfile': 'src/MQTTBuzz.icns',
