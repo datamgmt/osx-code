@@ -93,7 +93,8 @@ class MQTTBuzzApp(rumps.App):
                         "filter_time": 0  # No filter time by default
                     }
                 ],
-                "sounds_enabled": True  # Default sound setting to enabled
+                "sounds_enabled": True,  # Default sound setting to enabled
+                "max_message_length": 256 # Maximum message legth
             }
             self.save_config(default_config)
             return default_config
@@ -254,6 +255,11 @@ class MQTTBuzzApp(rumps.App):
 
         header = userdata.get("header", userdata["mqtt_broker"])
         subheader = userdata.get("subheader", userdata["mqtt_topic"])
+        
+        # Truncate the message if it's longer than the configured max length
+        if len(message) > self.config.get("max_message_length",256):
+            message = message[:self.config["max_message_length"]] 
+
         self.notify_with_sound(header, message, subheader=subheader,
             sounds=userdata.get("sounds_enabled", True))
 

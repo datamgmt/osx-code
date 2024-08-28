@@ -14,5 +14,6 @@
             "filter_time": 0
         }
     ],
-    "sounds_enabled": true
+    "sounds_enabled": true,
+    "max_message_length": 256
 }
