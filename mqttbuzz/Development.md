@@ -6,10 +6,11 @@ MQTTBuzz is written in Python and uses rumps and py2app to provide the OSX inter
 
 These are the core files and their purpose
 
-* src/MQTTBuzz.py - the python script that does the work
-* src/config.json - the configuration file
-* src/help.txt - the help file
-* setup.py - used by py2app to build the application
+ * src/MQTTBuzz.py - the python script that does the work
+ * src/config.json - the configuration file
+ * src/help.txt - the help file
+ * setup.py - used by py2app to build the application
+ * MQTTBuzz.icns - icons used for the application in Apple .icns format
 
 ## Set up the development environment
 
